@@ -37,13 +37,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
       if (!mounted) break;
       if (gameProvider.currentSessionStatus == 'guessing') {
         print('🎮 PICTONARY 🔮 [NAV] Passage à la phase guessing !');
-        // TODO: Navigator.pushReplacementNamed(context, '/guessing');
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Phase guessing détectée ! (page à créer)'),
-            backgroundColor: Colors.blue,
-          ),
-        );
+        Navigator.pushReplacementNamed(context, '/guessing');
         break;
       }
     }

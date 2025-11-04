@@ -185,13 +185,22 @@ class ApiService {
 
   /// Rejoindre une session
   Future<void> joinSession(String sessionId, String color) async {
+    final url = '${ApiConstants.baseUrl}${ApiConstants.joinSession(sessionId)}';
+    final body = jsonEncode({'color': color});
+    
+    print('🌐 [API_RAW] POST $url');
+    print('🌐 [API_RAW] Body: $body');
+    print('🌐 [API_RAW] Headers: $_headers');
+    
     final response = await http.post(
-      Uri.parse(
-        '${ApiConstants.baseUrl}${ApiConstants.joinSession(sessionId)}',
-      ),
+      Uri.parse(url),
       headers: _headers,
-      body: jsonEncode({'color': color}),
+      body: body,
     );
+    
+    print('🌐 [API_RAW] joinSession Response status: ${response.statusCode}');
+    print('🌐 [API_RAW] joinSession Response body: ${response.body}');
+    
     _handleError(response);
   }
 
@@ -208,21 +217,32 @@ class ApiService {
 
   /// Obtenir une session
   Future<GameSession> getGameSession(String sessionId) async {
+    final url = '${ApiConstants.baseUrl}${ApiConstants.getGameSession(sessionId)}';
+    print('🌐 [API_RAW] GET $url');
+    print('🌐 [API_RAW] Headers: $_headers');
+    
     final response = await http.get(
-      Uri.parse(
-        '${ApiConstants.baseUrl}${ApiConstants.getGameSession(sessionId)}',
-      ),
+      Uri.parse(url),
       headers: _headers,
     );
+    
+    print('🌐 [API_RAW] Response status: ${response.statusCode}');
+    print('🌐 [API_RAW] Response body BRUT: ${response.body}');
+    
     _handleError(response);
     
     final jsonData = jsonDecode(response.body);
-    print('🎮 PICTONARY 🔍 [API] Réponse getGameSession brute: $jsonData');
-    print('🎮 PICTONARY 🔍 [API] redTeam: ${jsonData['red_team']}');
-    print('🎮 PICTONARY 🔍 [API] blueTeam: ${jsonData['blue_team']}');
+    print('� [API_RAW] JSON décodé: $jsonData');
+    print('🌐 [API_RAW] Type de jsonData: ${jsonData.runtimeType}');
+    print('🌐 [API_RAW] Clés disponibles: ${jsonData.keys}');
+    print('🌐 [API_RAW] red_team brut: ${jsonData['red_team']}');
+    print('� [API_RAW] blue_team brut: ${jsonData['blue_team']}');
+    print('🌐 [API_RAW] Type red_team: ${jsonData['red_team'].runtimeType}');
+    print('� [API_RAW] Type blue_team: ${jsonData['blue_team'].runtimeType}');
     
+    print('🔄 [API_RAW] Appel GameSession.fromJson...');
     final session = GameSession.fromJson(jsonData);
-    print('🎮 PICTONARY 🔍 [API] Session parsée - redTeam: ${session.redTeam?.length ?? 0} joueurs, blueTeam: ${session.blueTeam?.length ?? 0} joueurs');
+    print('✅ [API_RAW] Session créée - redTeam: ${session.redTeam?.length ?? "null"}, blueTeam: ${session.blueTeam?.length ?? "null"}');
     
     return session;
   }
