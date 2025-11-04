@@ -19,7 +19,10 @@ class _DrawingScreenState extends State<DrawingScreen> {
   @override
   void initState() {
     super.initState();
-    _loadChallenges();
+    // Utiliser addPostFrameCallback pour charger après le build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadChallenges();
+    });
   }
 
   Future<void> _startWaitingForOthers() async {
@@ -55,12 +58,14 @@ class _DrawingScreenState extends State<DrawingScreen> {
       await challengeProvider.loadMyChallenges(sessionId);
 
       // Créer un controller pour chaque challenge
-      for (var challenge in challengeProvider.challengesToDraw) {
-        if (challenge.id != null) {
-          _promptControllers[challenge.id!] = TextEditingController();
+      if (mounted) {
+        for (var challenge in challengeProvider.challengesToDraw) {
+          if (challenge.id != null) {
+            _promptControllers[challenge.id!] = TextEditingController();
+          }
         }
+        setState(() {});
       }
-      setState(() {});
     }
   }
 

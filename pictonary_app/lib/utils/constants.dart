@@ -24,7 +24,7 @@ class ApiConstants {
   static String getMyChallenges(String sessionId) =>
       '/game_sessions/$sessionId/myChallenges';
   static String drawChallenge(String sessionId, String challengeId) =>
-      '/api/game_sessions/$sessionId/challenges/$challengeId/draw';
+      '/game_sessions/$sessionId/challenges/$challengeId/draw';
   static String getMyChallengesToGuess(String sessionId) =>
       '/game_sessions/$sessionId/myChallengesToGuess';
   static String answerChallenge(String sessionId, String challengeId) =>
