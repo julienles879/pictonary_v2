@@ -9,6 +9,8 @@ import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/join_game_screen.dart';
 import 'screens/lobby_screen.dart';
+import 'screens/challenge_screen.dart';
+import 'screens/drawing_screen.dart';
 import 'utils/logger.dart';
 
 Future<void> main() async {
@@ -31,6 +33,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final apiService = ApiService();
+    // Charger le token au démarrage
+    apiService.loadToken();
 
     return MultiProvider(
       providers: [
@@ -58,6 +62,8 @@ class MyApp extends StatelessWidget {
           '/home': (context) => const HomeScreen(),
           '/join': (context) => const JoinGameScreen(),
           '/lobby': (context) => const LobbyScreen(),
+          '/challenge': (context) => const ChallengeScreen(),
+          '/drawing': (context) => const DrawingScreen(),
         },
       ),
     );

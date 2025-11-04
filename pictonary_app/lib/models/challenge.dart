@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class Challenge {
   final String? id;
   final String firstWord;
@@ -34,6 +36,28 @@ class Challenge {
     // L'API retourne un id de type int, on le convertit en String
     final rawId = json['id'] ?? json['_id'] ?? json['challengeId'];
     final rawCreatedBy = json['createdBy'] ?? json['created_by'];
+    
+    // Parser les forbidden_words (peut être une String ou une List)
+    List<String> parseForbiddenWords(dynamic value) {
+      if (value == null) return [];
+      if (value is List) {
+        return List<String>.from(value);
+      }
+      if (value is String) {
+        // Si c'est une string, essayer de la parser comme JSON
+        try {
+          final decoded = jsonDecode(value);
+          if (decoded is List) {
+            return List<String>.from(decoded);
+          }
+        } catch (e) {
+          // Si le parsing échoue, retourner une liste vide
+          return [];
+        }
+      }
+      return [];
+    }
+    
     return Challenge(
       id: rawId != null ? rawId.toString() : null,
       firstWord: json['first_word'] ?? '',
@@ -41,9 +65,7 @@ class Challenge {
       thirdWord: json['third_word'] ?? '',
       fourthWord: json['fourth_word'] ?? '',
       fifthWord: json['fifth_word'] ?? '',
-      forbiddenWords: json['forbidden_words'] != null
-          ? List<String>.from(json['forbidden_words'])
-          : [],
+      forbiddenWords: parseForbiddenWords(json['forbidden_words']),
       prompt: json['prompt'],
       imageUrl: json['imageUrl'] ?? json['image_url'],
       answer: json['answer'],

@@ -32,7 +32,14 @@ class _LobbyScreenState extends State<LobbyScreen> {
   }
 
   Future<void> _refreshSession() async {
-    await context.read<GameProvider>().refreshSession();
+    final gameProvider = context.read<GameProvider>();
+    await gameProvider.refreshSession();
+    
+    // Vérifier si le statut a changé pour "challenge"
+    if (mounted && gameProvider.currentSession?.status == 'challenge') {
+      _refreshTimer?.cancel();
+      Navigator.of(context).pushReplacementNamed('/challenge');
+    }
   }
 
   void _copySessionId(String sessionId) {

@@ -218,8 +218,8 @@ class ApiService {
     
     final jsonData = jsonDecode(response.body);
     print('🎮 PICTONARY 🔍 [API] Réponse getGameSession brute: $jsonData');
-    print('🎮 PICTONARY 🔍 [API] redTeam: ${jsonData['redTeam']}');
-    print('🎮 PICTONARY 🔍 [API] blueTeam: ${jsonData['blueTeam']}');
+    print('🎮 PICTONARY 🔍 [API] redTeam: ${jsonData['red_team']}');
+    print('🎮 PICTONARY 🔍 [API] blueTeam: ${jsonData['blue_team']}');
     
     final session = GameSession.fromJson(jsonData);
     print('🎮 PICTONARY 🔍 [API] Session parsée - redTeam: ${session.redTeam?.length ?? 0} joueurs, blueTeam: ${session.blueTeam?.length ?? 0} joueurs');

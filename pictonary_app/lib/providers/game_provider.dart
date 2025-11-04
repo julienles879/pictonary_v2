@@ -85,7 +85,7 @@ class GameProvider with ChangeNotifier {
     }
   }
 
-  /// Rafraîchir la session
+  /// Rafraîchir la session actuelle
   Future<void> refreshSession() async {
     if (_currentSession?.id == null) return;
 
@@ -94,9 +94,15 @@ class GameProvider with ChangeNotifier {
       print(
         '🎮 Session rafraîchie: redTeam=${_currentSession!.redTeam?.length ?? 0}, blueTeam=${_currentSession!.blueTeam?.length ?? 0}',
       );
+      final previousStatus = _currentSessionStatus;
       _currentSessionStatus = await _apiService.getSessionStatus(
         _currentSession!.id!,
       );
+      
+      if (previousStatus != _currentSessionStatus) {
+        print('🎮 PICTONARY 🔄 [STATUS] Changement de statut: $previousStatus → $_currentSessionStatus');
+      }
+      
       _error = null;
       notifyListeners();
     } catch (e) {

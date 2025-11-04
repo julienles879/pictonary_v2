@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../models/challenge.dart';
 import '../services/api_service.dart';
+import '../utils/logger.dart';
 
 class ChallengeProvider with ChangeNotifier {
   final ApiService _apiService;
@@ -17,24 +18,47 @@ class ChallengeProvider with ChangeNotifier {
   List<Challenge> get challengesToGuess => _challengesToGuess;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  int get sentChallengesCount => _sentChallenges.length;
 
-  /// Envoyer un challenge
-  Future<bool> sendChallenge(String sessionId, Challenge challenge) async {
+  /// Envoyer un challenge avec paramètres séparés
+  Future<bool> sendChallenge({
+    required String sessionId,
+    required String firstWord,
+    required String secondWord,
+    required String thirdWord,
+    required String fourthWord,
+    required String fifthWord,
+    required List<String> forbiddenWords,
+  }) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
+      AppLogger.debug('📝 Envoi du challenge: $firstWord $secondWord $thirdWord $fourthWord $fifthWord');
+      AppLogger.debug('🚫 Mots interdits: ${forbiddenWords.join(", ")}');
+      
+      final challenge = Challenge(
+        firstWord: firstWord,
+        secondWord: secondWord,
+        thirdWord: thirdWord,
+        fourthWord: fourthWord,
+        fifthWord: fifthWord,
+        forbiddenWords: forbiddenWords,
+      );
+      
       final newChallenge = await _apiService.sendChallenge(
         sessionId,
         challenge,
       );
       _sentChallenges.add(newChallenge);
+      AppLogger.success('✅ Challenge envoyé ! Total: ${_sentChallenges.length}/3');
       _error = null;
       _isLoading = false;
       notifyListeners();
       return true;
     } catch (e) {
+      AppLogger.error('❌ Erreur envoi challenge', e);
       _error = e.toString();
       _isLoading = false;
       notifyListeners();
@@ -49,9 +73,15 @@ class ChallengeProvider with ChangeNotifier {
     notifyListeners();
 
     try {
+      AppLogger.debug('🎨 Chargement des challenges à dessiner...');
       _challengesToDraw = await _apiService.getMyChallenges(sessionId);
+      AppLogger.success('✅ ${_challengesToDraw.length} challenges à dessiner chargés');
+      for (var challenge in _challengesToDraw) {
+        AppLogger.debug('  📝 Challenge: ${challenge.fullPhrase}');
+      }
       _error = null;
     } catch (e) {
+      AppLogger.error('❌ Erreur chargement challenges à dessiner', e);
       _error = e.toString();
     } finally {
       _isLoading = false;
