@@ -8,6 +8,7 @@ class ChallengeProvider with ChangeNotifier {
   List<Challenge> _sentChallenges = [];
   List<Challenge> _challengesToDraw = [];
   List<Challenge> _challengesToGuess = [];
+  List<Challenge> _allChallenges = [];
   bool _isLoading = false;
   String? _error;
 
@@ -16,6 +17,7 @@ class ChallengeProvider with ChangeNotifier {
   List<Challenge> get sentChallenges => _sentChallenges;
   List<Challenge> get challengesToDraw => _challengesToDraw;
   List<Challenge> get challengesToGuess => _challengesToGuess;
+  List<Challenge> get allChallenges => _allChallenges;
   bool get isLoading => _isLoading;
   String? get error => _error;
   int get sentChallengesCount => _sentChallenges.length;
@@ -121,9 +123,16 @@ class ChallengeProvider with ChangeNotifier {
     notifyListeners();
 
     try {
+      AppLogger.debug('🔮 Chargement des challenges à deviner...');
       _challengesToGuess = await _apiService.getMyChallengesToGuess(sessionId);
+      AppLogger.success('✅ ${_challengesToGuess.length} challenges à deviner chargés');
+      for (var challenge in _challengesToGuess) {
+        AppLogger.debug('  📝 Challenge: ${challenge.fullPhrase}');
+        AppLogger.debug('  🖼️ ImageUrl: ${challenge.imageUrl ?? "null"}');
+      }
       _error = null;
     } catch (e) {
+      AppLogger.error('Erreur lors du chargement des challenges à deviner: $e');
       _error = e.toString();
     } finally {
       _isLoading = false;
@@ -162,6 +171,27 @@ class ChallengeProvider with ChangeNotifier {
     }
   }
 
+  /// Charger tous les challenges d'une session (mode finished)
+  Future<void> loadAllChallenges(String sessionId) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      AppLogger.debug('🏆 Chargement de tous les challenges pour les résultats...');
+      _allChallenges = await _apiService.listChallenges(sessionId);
+      AppLogger.success('✅ ${_allChallenges.length} challenges chargés');
+      _error = null;
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      AppLogger.error('Erreur lors du chargement des challenges: $e');
+      _error = e.toString();
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   void clearError() {
     _error = null;
     notifyListeners();
@@ -171,6 +201,7 @@ class ChallengeProvider with ChangeNotifier {
     _sentChallenges = [];
     _challengesToDraw = [];
     _challengesToGuess = [];
+    _allChallenges = [];
     _error = null;
     notifyListeners();
   }

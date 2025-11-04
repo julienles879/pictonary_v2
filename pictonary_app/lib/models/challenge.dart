@@ -13,6 +13,8 @@ class Challenge {
   final String? answer;
   final bool? isResolved;
   final String? createdBy;
+  final String? challengerId; // ID du joueur qui a créé le challenge
+  final String? challengedId; // ID du joueur qui doit deviner
 
   Challenge({
     this.id,
@@ -27,6 +29,8 @@ class Challenge {
     this.answer,
     this.isResolved,
     this.createdBy,
+    this.challengerId,
+    this.challengedId,
   });
 
   String get fullPhrase =>
@@ -58,6 +62,9 @@ class Challenge {
       return [];
     }
 
+    final rawChallengerId = json['challenger_id'];
+    final rawChallengedId = json['challenged_id'];
+
     return Challenge(
       id: rawId != null ? rawId.toString() : null,
       firstWord: json['first_word'] ?? '',
@@ -67,10 +74,14 @@ class Challenge {
       fifthWord: json['fifth_word'] ?? '',
       forbiddenWords: parseForbiddenWords(json['forbidden_words']),
       prompt: json['prompt'],
-      imageUrl: json['imageUrl'] ?? json['image_url'],
+      imageUrl: json['image_path'] ?? json['imageUrl'] ?? json['image_url'],
       answer: json['answer'],
-      isResolved: json['is_resolved'],
+      isResolved: json['is_resolved'] != null 
+          ? (json['is_resolved'] == 1 || json['is_resolved'] == true)
+          : null,
       createdBy: rawCreatedBy != null ? rawCreatedBy.toString() : null,
+      challengerId: rawChallengerId != null ? rawChallengerId.toString() : null,
+      challengedId: rawChallengedId != null ? rawChallengedId.toString() : null,
     );
   }
 

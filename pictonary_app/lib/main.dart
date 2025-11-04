@@ -12,6 +12,7 @@ import 'screens/lobby_screen.dart';
 import 'screens/challenge_screen.dart';
 import 'screens/drawing_screen.dart';
 import 'screens/guessing_screen.dart';
+import 'screens/finished_screen.dart';
 import 'utils/logger.dart';
 
 Future<void> main() async {
@@ -66,6 +67,7 @@ class MyApp extends StatelessWidget {
           '/challenge': (context) => const ChallengeScreen(),
           '/drawing': (context) => const DrawingScreen(),
           '/guessing': (context) => const GuessingScreen(),
+          '/finished': (context) => const FinishedScreen(),
         },
       ),
     );

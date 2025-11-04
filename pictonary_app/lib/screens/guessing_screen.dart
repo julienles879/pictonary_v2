@@ -13,8 +13,16 @@ class GuessingScreen extends StatefulWidget {
 
 class _GuessingScreenState extends State<GuessingScreen> {
   final Map<String, List<TextEditingController>> _answerControllers = {};
+  final Map<String, String?> _word1Values = {}; // Pour dropdown mot 1
+  final Map<String, String?> _word3Values = {}; // Pour dropdown mot 3
+  final Map<String, String?> _word4Values = {}; // Pour dropdown mot 4
   final Set<String> _submittedChallenges = {};
   bool _allAnswersSubmitted = false;
+
+  // Listes de valeurs pour les dropdowns (même que challenge_screen)
+  final List<String> _word1Options = ['un', 'une'];
+  final List<String> _word3Options = ['sur', 'dans'];
+  final List<String> _word4Options = ['un', 'une'];
 
   @override
   void initState() {
@@ -37,13 +45,7 @@ class _GuessingScreenState extends State<GuessingScreen> {
       if (!mounted) break;
       if (gameProvider.currentSessionStatus == 'finished') {
         print('🎮 PICTONARY 🏆 [NAV] Passage à la phase finished !');
-        // TODO: Navigator.pushReplacementNamed(context, '/finished');
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Phase finished détectée ! (page à créer)'),
-            backgroundColor: Colors.purple,
-          ),
-        );
+        Navigator.pushReplacementNamed(context, '/finished');
         break;
       }
     }
@@ -57,14 +59,23 @@ class _GuessingScreenState extends State<GuessingScreen> {
     if (sessionId != null) {
       await challengeProvider.loadChallengesToGuess(sessionId);
 
-      // Créer 5 controllers pour chaque challenge
+      // Créer controllers pour mots 2 et 5 seulement (1, 3, 4 sont des dropdowns)
       if (mounted) {
+        print('🖼️ [GUESSING] Challenges chargés:');
         for (var challenge in challengeProvider.challengesToGuess) {
+          print('  - Challenge: ${challenge.fullPhrase}');
+          print('    imageUrl: ${challenge.imageUrl}');
+          print('    imageUrl isEmpty: ${challenge.imageUrl?.isEmpty ?? true}');
           if (challenge.id != null) {
-            _answerControllers[challenge.id!] = List.generate(
-              5,
-              (_) => TextEditingController(),
-            );
+            // Seulement 2 controllers: mot 2 et mot 5
+            _answerControllers[challenge.id!] = [
+              TextEditingController(), // mot 2
+              TextEditingController(), // mot 5
+            ];
+            // Initialiser les valeurs des dropdowns à null
+            _word1Values[challenge.id!] = null;
+            _word3Values[challenge.id!] = null;
+            _word4Values[challenge.id!] = null;
           }
         }
         setState(() {});
@@ -86,14 +97,16 @@ class _GuessingScreenState extends State<GuessingScreen> {
     final controllers = _answerControllers[challengeId];
     if (controllers == null) return;
 
-    // Vérifier que tous les champs sont remplis
-    for (var controller in controllers) {
-      if (controller.text.trim().isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Veuillez remplir tous les mots')),
-        );
-        return;
-      }
+    // Vérifier que tous les champs sont remplis (dropdowns + text fields)
+    if (_word1Values[challengeId] == null ||
+        controllers[0].text.trim().isEmpty || // mot 2
+        _word3Values[challengeId] == null ||
+        _word4Values[challengeId] == null ||
+        controllers[1].text.trim().isEmpty) { // mot 5
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Veuillez remplir tous les mots')),
+      );
+      return;
     }
 
     final gameProvider = context.read<GameProvider>();
@@ -102,8 +115,8 @@ class _GuessingScreenState extends State<GuessingScreen> {
 
     if (sessionId == null) return;
 
-    // Construire la réponse complète
-    final answer = controllers.map((c) => c.text.trim()).join(' ');
+    // Construire la réponse complète à partir des dropdowns et text fields
+    final answer = '${_word1Values[challengeId]} ${controllers[0].text.trim()} ${_word3Values[challengeId]} ${_word4Values[challengeId]} ${controllers[1].text.trim()}';
 
     final success = await challengeProvider.answerChallenge(
       sessionId,
@@ -400,19 +413,30 @@ class _GuessingScreenState extends State<GuessingScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: TextField(
-                      controller: controllers[0],
+                    child: DropdownButtonFormField<String>(
+                      value: _word1Values[challengeId],
                       decoration: const InputDecoration(
                         labelText: 'Mot 1',
                         border: OutlineInputBorder(),
                         contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                       ),
+                      items: _word1Options
+                          .map((word) => DropdownMenuItem(
+                                value: word,
+                                child: Text(word),
+                              ))
+                          .toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _word1Values[challengeId] = value;
+                        });
+                      },
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: TextField(
-                      controller: controllers[1],
+                      controller: controllers[0],
                       decoration: const InputDecoration(
                         labelText: 'Mot 2',
                         border: OutlineInputBorder(),
@@ -426,31 +450,53 @@ class _GuessingScreenState extends State<GuessingScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: TextField(
-                      controller: controllers[2],
+                    child: DropdownButtonFormField<String>(
+                      value: _word3Values[challengeId],
                       decoration: const InputDecoration(
                         labelText: 'Mot 3',
                         border: OutlineInputBorder(),
                         contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                       ),
+                      items: _word3Options
+                          .map((word) => DropdownMenuItem(
+                                value: word,
+                                child: Text(word),
+                              ))
+                          .toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _word3Values[challengeId] = value;
+                        });
+                      },
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: TextField(
-                      controller: controllers[3],
+                    child: DropdownButtonFormField<String>(
+                      value: _word4Values[challengeId],
                       decoration: const InputDecoration(
                         labelText: 'Mot 4',
                         border: OutlineInputBorder(),
                         contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                       ),
+                      items: _word4Options
+                          .map((word) => DropdownMenuItem(
+                                value: word,
+                                child: Text(word),
+                              ))
+                          .toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _word4Values[challengeId] = value;
+                        });
+                      },
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
               TextField(
-                controller: controllers[4],
+                controller: controllers[1],
                 decoration: const InputDecoration(
                   labelText: 'Mot 5',
                   border: OutlineInputBorder(),

@@ -319,15 +319,28 @@ class ApiService {
 
   /// Obtenir les challenges à deviner
   Future<List<Challenge>> getMyChallengesToGuess(String sessionId) async {
+    final url = '${ApiConstants.baseUrl}${ApiConstants.getMyChallengesToGuess(sessionId)}';
+    print('🌐 [API_RAW] GET $url');
+    
     final response = await http.get(
-      Uri.parse(
-        '${ApiConstants.baseUrl}${ApiConstants.getMyChallengesToGuess(sessionId)}',
-      ),
+      Uri.parse(url),
       headers: _headers,
     );
+    
+    print('🌐 [API_RAW] Response status: ${response.statusCode}');
+    print('🌐 [API_RAW] Response body: ${response.body}');
+    
     _handleError(response);
     final data = jsonDecode(response.body);
     final List items = data is List ? data : (data['items'] ?? []);
+    
+    print('🌐 [API_RAW] Nombre de challenges: ${items.length}');
+    for (var item in items) {
+      print('🌐 [API_RAW] Challenge JSON: $item');
+      print('🌐 [API_RAW] imageUrl field: ${item['imageUrl']}');
+      print('🌐 [API_RAW] image_url field: ${item['image_url']}');
+    }
+    
     return items.map((json) => Challenge.fromJson(json)).toList();
   }
 
