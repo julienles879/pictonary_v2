@@ -1,0 +1,13 @@
+pub.dev
+stack pour mettre en arrière plan
+expanded permet de prendre le plus de place possible (row / column)
+ListView avec children permet de défiler (même principe que column)
+
+
+auth/create
+auth/login
+
+me/
+
+
+reversepod choix equipe, phase de jeux deviner, 
