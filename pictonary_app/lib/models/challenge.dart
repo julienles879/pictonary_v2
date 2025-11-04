@@ -36,7 +36,7 @@ class Challenge {
     // L'API retourne un id de type int, on le convertit en String
     final rawId = json['id'] ?? json['_id'] ?? json['challengeId'];
     final rawCreatedBy = json['createdBy'] ?? json['created_by'];
-    
+
     // Parser les forbidden_words (peut être une String ou une List)
     List<String> parseForbiddenWords(dynamic value) {
       if (value == null) return [];
@@ -57,7 +57,7 @@ class Challenge {
       }
       return [];
     }
-    
+
     return Challenge(
       id: rawId != null ? rawId.toString() : null,
       firstWord: json['first_word'] ?? '',

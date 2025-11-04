@@ -14,7 +14,7 @@ class ChallengeScreen extends StatefulWidget {
 class _ChallengeScreenState extends State<ChallengeScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _submitted = false;
-  
+
   // Listes de valeurs pour les dropdowns
   final List<String> _word1Options = ['un', 'une'];
   final List<String> _word3Options = ['sur', 'dans'];
@@ -23,7 +23,7 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
   @override
   void initState() {
     super.initState();
-    // Ne pas démarrer le polling automatiquement, 
+    // Ne pas démarrer le polling automatiquement,
     // seulement après l'envoi des challenges
   }
 
@@ -32,10 +32,10 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
     while (mounted && _submitted) {
       await Future.delayed(const Duration(seconds: 3));
       if (!mounted || !_submitted) break;
-      
+
       final gameProvider = context.read<GameProvider>();
       await gameProvider.refreshSession();
-      
+
       if (!mounted) break;
       if (gameProvider.currentSessionStatus == 'drawing') {
         print('🎮 PICTONARY 🎨 [NAV] Passage à la phase drawing !');
@@ -141,7 +141,11 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
     // Vérifier que tous les mots sont remplis
     if (words.any((w) => w.isEmpty)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$challengeName: Les 3 mots interdits doivent être remplis')),
+        SnackBar(
+          content: Text(
+            '$challengeName: Les 3 mots interdits doivent être remplis',
+          ),
+        ),
       );
       return false;
     }
@@ -149,7 +153,11 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
     // Vérifier qu'ils sont tous différents
     if (words.toSet().length != words.length) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$challengeName: Les 3 mots interdits doivent être différents')),
+        SnackBar(
+          content: Text(
+            '$challengeName: Les 3 mots interdits doivent être différents',
+          ),
+        ),
       );
       return false;
     }
@@ -168,9 +176,9 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
 
     if (sessionId == null) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Aucune session active')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Aucune session active')));
       }
       return;
     }
@@ -250,18 +258,20 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
       });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Les 3 challenges ont été envoyés ! En attente des autres joueurs...'),
+          content: Text(
+            'Les 3 challenges ont été envoyés ! En attente des autres joueurs...',
+          ),
           duration: Duration(seconds: 3),
         ),
       );
-      
+
       // Démarrer le polling pour attendre les autres joueurs
       print('🎮 PICTONARY ⏳ [WAIT] En attente des autres joueurs...');
       _startWaitingForOthers();
     } else if (mounted && challengeProvider.error != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(challengeProvider.error!)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(challengeProvider.error!)));
     }
   }
 
@@ -272,9 +282,7 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
     final authProvider = context.watch<AuthProvider>();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Phase Challenge - 3 phrases à créer'),
-      ),
+      appBar: AppBar(title: const Text('Phase Challenge - 3 phrases à créer')),
       body: _submitted
           ? Container(
               decoration: BoxDecoration(
@@ -395,51 +403,62 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
                       style: TextStyle(fontSize: 14),
                     ),
                     const SizedBox(height: 24),
-                    
+
                     // Challenge 1
                     _buildChallengeCard(
                       '1',
-                      _ch1_word1, (v) => setState(() => _ch1_word1 = v),
+                      _ch1_word1,
+                      (v) => setState(() => _ch1_word1 = v),
                       _ch1_word2,
-                      _ch1_word3, (v) => setState(() => _ch1_word3 = v),
-                      _ch1_word4, (v) => setState(() => _ch1_word4 = v),
+                      _ch1_word3,
+                      (v) => setState(() => _ch1_word3 = v),
+                      _ch1_word4,
+                      (v) => setState(() => _ch1_word4 = v),
                       _ch1_word5,
                       _ch1_forbidden1,
                       _ch1_forbidden2,
                       _ch1_forbidden3,
                     ),
                     const SizedBox(height: 20),
-                    
+
                     // Challenge 2
                     _buildChallengeCard(
                       '2',
-                      _ch2_word1, (v) => setState(() => _ch2_word1 = v),
+                      _ch2_word1,
+                      (v) => setState(() => _ch2_word1 = v),
                       _ch2_word2,
-                      _ch2_word3, (v) => setState(() => _ch2_word3 = v),
-                      _ch2_word4, (v) => setState(() => _ch2_word4 = v),
+                      _ch2_word3,
+                      (v) => setState(() => _ch2_word3 = v),
+                      _ch2_word4,
+                      (v) => setState(() => _ch2_word4 = v),
                       _ch2_word5,
                       _ch2_forbidden1,
                       _ch2_forbidden2,
                       _ch2_forbidden3,
                     ),
                     const SizedBox(height: 20),
-                    
+
                     // Challenge 3
                     _buildChallengeCard(
                       '3',
-                      _ch3_word1, (v) => setState(() => _ch3_word1 = v),
+                      _ch3_word1,
+                      (v) => setState(() => _ch3_word1 = v),
                       _ch3_word2,
-                      _ch3_word3, (v) => setState(() => _ch3_word3 = v),
-                      _ch3_word4, (v) => setState(() => _ch3_word4 = v),
+                      _ch3_word3,
+                      (v) => setState(() => _ch3_word3 = v),
+                      _ch3_word4,
+                      (v) => setState(() => _ch3_word4 = v),
                       _ch3_word5,
                       _ch3_forbidden1,
                       _ch3_forbidden2,
                       _ch3_forbidden3,
                     ),
                     const SizedBox(height: 32),
-                    
+
                     ElevatedButton(
-                      onPressed: challengeProvider.isLoading ? null : _submitAllChallenges,
+                      onPressed: challengeProvider.isLoading
+                          ? null
+                          : _submitAllChallenges,
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.all(16),
                         backgroundColor: Colors.green,
@@ -456,7 +475,10 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
                             )
                           : const Text(
                               'Envoyer les 3 challenges',
-                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                     ),
                   ],
@@ -468,10 +490,13 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
 
   Widget _buildChallengeCard(
     String number,
-    String? word1, void Function(String?) onWord1Changed,
+    String? word1,
+    void Function(String?) onWord1Changed,
     TextEditingController word2Controller,
-    String? word3, void Function(String?) onWord3Changed,
-    String? word4, void Function(String?) onWord4Changed,
+    String? word3,
+    void Function(String?) onWord3Changed,
+    String? word4,
+    void Function(String?) onWord4Changed,
     TextEditingController word5Controller,
     TextEditingController forbidden1,
     TextEditingController forbidden2,
@@ -494,7 +519,10 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
             ),
             const Divider(),
             const SizedBox(height: 12),
-            const Text('Phrase de 5 mots :', style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text(
+              'Phrase de 5 mots :',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 12),
             _buildDropdownField('Mot 1', word1, _word1Options, onWord1Changed),
             const SizedBox(height: 10),
@@ -506,7 +534,10 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
             const SizedBox(height: 10),
             _buildWordField('Mot 5', word5Controller),
             const SizedBox(height: 20),
-            const Text('Mots interdits :', style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text(
+              'Mots interdits :',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 8),
             _buildWordField('Mot interdit 1', forbidden1),
             const SizedBox(height: 10),
@@ -555,10 +586,7 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
         fillColor: Colors.blue[50],
       ),
       items: options.map((String value) {
-        return DropdownMenuItem<String>(
-          value: value,
-          child: Text(value),
-        );
+        return DropdownMenuItem<String>(value: value, child: Text(value));
       }).toList(),
       onChanged: onChanged,
       validator: (value) {
