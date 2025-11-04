@@ -208,20 +208,23 @@ class ApiService {
 
   /// Obtenir une session
   Future<GameSession> getGameSession(String sessionId) async {
-    final url = '${ApiConstants.baseUrl}${ApiConstants.getGameSession(sessionId)}';
-    AppLogger.api('GET $url');
-    
     final response = await http.get(
-      Uri.parse(url),
+      Uri.parse(
+        '${ApiConstants.baseUrl}${ApiConstants.getGameSession(sessionId)}',
+      ),
       headers: _headers,
     );
-    AppLogger.api('Réponse: ${response.statusCode}');
     _handleError(response);
     
-    final data = jsonDecode(response.body);
-    AppLogger.debug('Données session reçues: $data');
+    final jsonData = jsonDecode(response.body);
+    print('🎮 PICTONARY 🔍 [API] Réponse getGameSession brute: $jsonData');
+    print('🎮 PICTONARY 🔍 [API] redTeam: ${jsonData['redTeam']}');
+    print('🎮 PICTONARY 🔍 [API] blueTeam: ${jsonData['blueTeam']}');
     
-    return GameSession.fromJson(data);
+    final session = GameSession.fromJson(jsonData);
+    print('🎮 PICTONARY 🔍 [API] Session parsée - redTeam: ${session.redTeam?.length ?? 0} joueurs, blueTeam: ${session.blueTeam?.length ?? 0} joueurs');
+    
+    return session;
   }
 
   /// Obtenir le statut d'une session

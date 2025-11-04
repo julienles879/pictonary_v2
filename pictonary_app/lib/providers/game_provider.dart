@@ -15,9 +15,6 @@ class GameProvider with ChangeNotifier {
   String? get currentSessionStatus => _currentSessionStatus;
   bool get isLoading => _isLoading;
   String? get error => _error;
-  
-  // Permet d'accéder à l'API Service depuis l'extérieur
-  ApiService getApiService() => _apiService;
 
   /// Créer une nouvelle session
   Future<bool> createSession() async {
@@ -47,14 +44,20 @@ class GameProvider with ChangeNotifier {
     notifyListeners();
 
     try {
+      print('🎮 PICTONARY 📝 [JOIN] Tentative de rejoindre la session $sessionId dans l\'équipe $color');
       await _apiService.joinSession(sessionId, color);
+      print('🎮 PICTONARY ✅ [JOIN] API joinSession OK, récupération de la session mise à jour...');
+      
       _currentSession = await _apiService.getGameSession(sessionId);
+      print('🎮 PICTONARY 🔍 [JOIN] Session récupérée: redTeam=${_currentSession?.redTeam?.map((p) => p.name).join(", ")}, blueTeam=${_currentSession?.blueTeam?.map((p) => p.name).join(", ")}');
+      
       _currentSessionStatus = _currentSession?.status;
       _error = null;
       _isLoading = false;
       notifyListeners();
       return true;
     } catch (e) {
+      print('🎮 PICTONARY ❌ [JOIN] Erreur lors du join: $e');
       _error = e.toString();
       _isLoading = false;
       notifyListeners();
@@ -88,7 +91,9 @@ class GameProvider with ChangeNotifier {
 
     try {
       _currentSession = await _apiService.getGameSession(_currentSession!.id!);
-      print('🎮 Session rafraîchie: redTeam=${_currentSession!.redTeamIds?.length ?? 0}, blueTeam=${_currentSession!.blueTeamIds?.length ?? 0}');
+      print(
+        '🎮 Session rafraîchie: redTeam=${_currentSession!.redTeam?.length ?? 0}, blueTeam=${_currentSession!.blueTeam?.length ?? 0}',
+      );
       _currentSessionStatus = await _apiService.getSessionStatus(
         _currentSession!.id!,
       );

@@ -4,8 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../providers/game_provider.dart';
 import '../providers/auth_provider.dart';
-import '../models/player.dart';
-import '../services/api_service.dart';
 
 class LobbyScreen extends StatefulWidget {
   const LobbyScreen({super.key});
@@ -46,21 +44,26 @@ class _LobbyScreenState extends State<LobbyScreen> {
 
   bool _isPlayerInTeam(session, String? playerId) {
     if (playerId == null) return false;
-    
-    final inRedTeam = session.redTeamIds?.contains(playerId) ?? false;
-    final inBlueTeam = session.blueTeamIds?.contains(playerId) ?? false;
-    
+
+    final inRedTeam = session.redTeam?.any((p) => p.id == playerId) ?? false;
+    final inBlueTeam = session.blueTeam?.any((p) => p.id == playerId) ?? false;
+
     return inRedTeam || inBlueTeam;
   }
 
   Future<void> _joinTeam(String color) async {
     final gameProvider = context.read<GameProvider>();
+    final authProvider = context.read<AuthProvider>();
+    
+    print('🎮 PICTONARY 👤 [LOBBY] Joueur ${authProvider.currentPlayer?.name} (ID: ${authProvider.currentPlayer?.id}) veut rejoindre l\'équipe $color');
+    
     final success = await gameProvider.joinSession(
       gameProvider.currentSession!.id!,
       color,
     );
-    
+
     if (success) {
+      print('🎮 PICTONARY ✅ [LOBBY] Succès! Affichage du SnackBar et rafraîchissement...');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -72,9 +75,10 @@ class _LobbyScreenState extends State<LobbyScreen> {
       await Future.delayed(const Duration(milliseconds: 500));
       await _refreshSession();
     } else if (gameProvider.error != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(gameProvider.error!)),
-      );
+      print('🎮 PICTONARY ❌ [LOBBY] Échec du join: ${gameProvider.error}');
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(gameProvider.error!)));
     }
   }
 
@@ -92,8 +96,12 @@ class _LobbyScreenState extends State<LobbyScreen> {
     }
 
     // Debug : afficher les équipes dans la console
-    print('🔴 Équipe Rouge (IDs): ${session.redTeamIds?.join(", ") ?? "vide"}');
-    print('🔵 Équipe Bleue (IDs): ${session.blueTeamIds?.join(", ") ?? "vide"}');
+    print(
+      '🔴 Équipe Rouge: ${session.redTeam?.map((p) => p.name).join(", ") ?? "vide"}',
+    );
+    print(
+      '🔵 Équipe Bleue: ${session.blueTeam?.map((p) => p.name).join(", ") ?? "vide"}',
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -223,14 +231,31 @@ class _LobbyScreenState extends State<LobbyScreen> {
                             ),
                           ),
                           const SizedBox(height: 8),
-                          if (session.redTeamIds == null ||
-                              session.redTeamIds!.isEmpty)
+                          if (session.redTeam == null ||
+                              session.redTeam!.isEmpty)
                             const Text('Aucun joueur')
                           else
-                            ...session.redTeamIds!.map(
-                              (playerId) => _PlayerListItem(
-                                playerId: playerId,
-                                currentPlayerId: authProvider.currentPlayer?.id,
+                            ...session.redTeam!.map(
+                              (player) => Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 4,
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.person, size: 16),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      player.name,
+                                      style: TextStyle(
+                                        fontWeight:
+                                            player.id ==
+                                                authProvider.currentPlayer?.id
+                                            ? FontWeight.bold
+                                            : FontWeight.normal,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                         ],
@@ -255,14 +280,31 @@ class _LobbyScreenState extends State<LobbyScreen> {
                             ),
                           ),
                           const SizedBox(height: 8),
-                          if (session.blueTeamIds == null ||
-                              session.blueTeamIds!.isEmpty)
+                          if (session.blueTeam == null ||
+                              session.blueTeam!.isEmpty)
                             const Text('Aucun joueur')
                           else
-                            ...session.blueTeamIds!.map(
-                              (playerId) => _PlayerListItem(
-                                playerId: playerId,
-                                currentPlayerId: authProvider.currentPlayer?.id,
+                            ...session.blueTeam!.map(
+                              (player) => Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 4,
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.person, size: 16),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      player.name,
+                                      style: TextStyle(
+                                        fontWeight:
+                                            player.id ==
+                                                authProvider.currentPlayer?.id
+                                            ? FontWeight.bold
+                                            : FontWeight.normal,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                         ],
@@ -343,80 +385,6 @@ class _LobbyScreenState extends State<LobbyScreen> {
           ],
         ),
       ),
-    );
-  }
-}
-
-// Widget pour afficher un joueur avec son nom récupéré depuis l'API
-class _PlayerListItem extends StatelessWidget {
-  final String playerId;
-  final String? currentPlayerId;
-
-  const _PlayerListItem({
-    required this.playerId,
-    this.currentPlayerId,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final apiService = context.read<GameProvider>().getApiService();
-    
-    return FutureBuilder<Player>(
-      future: apiService.getPlayerById(playerId),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Padding(
-            padding: EdgeInsets.symmetric(vertical: 4),
-            child: Row(
-              children: [
-                SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-                SizedBox(width: 4),
-                Text('Chargement...'),
-              ],
-            ),
-          );
-        }
-        
-        if (snapshot.hasError) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            child: Row(
-              children: [
-                const Icon(Icons.error, size: 16, color: Colors.red),
-                const SizedBox(width: 4),
-                Text('Joueur #$playerId'),
-              ],
-            ),
-          );
-        }
-        
-        final player = snapshot.data!;
-        final isCurrentPlayer = player.id == currentPlayerId;
-        
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: Row(
-            children: [
-              const Icon(Icons.person, size: 16),
-              const SizedBox(width: 4),
-              Text(
-                player.name,
-                style: TextStyle(
-                  fontWeight: isCurrentPlayer ? FontWeight.bold : FontWeight.normal,
-                ),
-              ),
-              if (isCurrentPlayer) ...[
-                const SizedBox(width: 4),
-                const Text('(Vous)', style: TextStyle(fontStyle: FontStyle.italic)),
-              ],
-            ],
-          ),
-        );
-      },
     );
   }
 }
