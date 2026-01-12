@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../providers/challenge_provider.dart';
 import '../providers/game_provider.dart';
 import '../models/challenge.dart';
+import '../widgets/notebook_background.dart';
+import '../theme/doodle_theme.dart';
 
 class FinishedScreen extends StatefulWidget {
   const FinishedScreen({super.key});
@@ -85,15 +87,16 @@ class _FinishedScreenState extends State<FinishedScreen> {
     }
 
     return Scaffold(
+      backgroundColor: DoodleTheme.skyBlue,
       appBar: AppBar(
-        title: const Text('Résultats'),
-        backgroundColor: Colors.purple,
-        foregroundColor: Colors.white,
+        title: const Text('🏆 Résultats'),
+        centerTitle: true,
         automaticallyImplyLeading: false, // Pas de bouton retour
       ),
-      body: challengeProvider.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
+      body: NotebookBackground(
+        child: challengeProvider.isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -222,6 +225,7 @@ class _FinishedScreenState extends State<FinishedScreen> {
                 ],
               ),
             ),
+      ),
     );
   }
 

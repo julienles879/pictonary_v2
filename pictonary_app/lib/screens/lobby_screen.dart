@@ -4,6 +4,10 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../providers/game_provider.dart';
 import '../providers/auth_provider.dart';
+import '../widgets/notebook_background.dart';
+import '../widgets/doodle_button.dart';
+import '../widgets/doodle_card.dart';
+import '../theme/doodle_theme.dart';
 
 class LobbyScreen extends StatefulWidget {
   const LobbyScreen({super.key});
@@ -97,8 +101,28 @@ class _LobbyScreenState extends State<LobbyScreen> {
 
     if (session == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Lobby')),
-        body: const Center(child: Text('Aucune session active')),
+        backgroundColor: DoodleTheme.skyBlue,
+        appBar: AppBar(
+          title: const Text('🎮 Lobby'),
+          centerTitle: true,
+        ),
+        body: NotebookBackground(
+          child: Center(
+            child: DoodleCard(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: const [
+                  Icon(Icons.error_outline, size: 64, color: DoodleTheme.teamRed),
+                  SizedBox(height: 16),
+                  Text(
+                    'Aucune session active',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       );
     }
 
@@ -111,12 +135,15 @@ class _LobbyScreenState extends State<LobbyScreen> {
     );
 
     return Scaffold(
+      backgroundColor: DoodleTheme.skyBlue,
       appBar: AppBar(
-        title: const Text('Lobby'),
+        title: const Text('🎮 Lobby'),
+        centerTitle: true,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _refreshSession,
+            tooltip: 'Rafraîchir',
           ),
           IconButton(
             icon: const Icon(Icons.exit_to_app),
@@ -126,90 +153,144 @@ class _LobbyScreenState extends State<LobbyScreen> {
                 Navigator.of(context).pop();
               }
             },
+            tooltip: 'Quitter',
           ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: _refreshSession,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
+      body: NotebookBackground(
+        child: RefreshIndicator(
+          onRefresh: _refreshSession,
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              const SizedBox(height: 16),
+              // Info session avec ID copiable
+              DoodleCard(
+                color: const Color(0xFFFFF9C4),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    const Icon(
+                      Icons.videogame_asset,
+                      size: 48,
+                      color: DoodleTheme.sunYellow,
+                    ),
+                    const SizedBox(height: 12),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
-                          'Session: ${session.id}',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                        Flexible(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: DoodleTheme.inkBlack,
+                                width: 2,
+                              ),
+                            ),
+                            child: Text(
+                              '📌 ${session.id}',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.copy),
-                          onPressed: () => _copySessionId(session.id!),
-                          tooltip: 'Copier l\'ID',
+                        const SizedBox(width: 8),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: DoodleTheme.grassGreen,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: DoodleTheme.inkBlack,
+                              width: 2,
+                            ),
+                          ),
+                          child: IconButton(
+                            icon: const Icon(Icons.copy, color: Colors.white, size: 20),
+                            onPressed: () => _copySessionId(session.id!),
+                            tooltip: 'Copier l\'ID',
+                            padding: const EdgeInsets.all(8),
+                            constraints: const BoxConstraints(),
+                          ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Statut: ${gameProvider.currentSessionStatus ?? session.status}',
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFC8E6C9),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: DoodleTheme.grassGreen,
+                          width: 2,
+                        ),
+                      ),
+                      child: Text(
+                        '📍 ${gameProvider.currentSessionStatus ?? session.status}',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: DoodleTheme.grassGreen,
+                        ),
+                      ),
                     ),
                   ],
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
-            // Sélecteur d'équipe si le joueur n'en a pas encore
-            if (!_isPlayerInTeam(session, authProvider.currentPlayer?.id))
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
+              const SizedBox(height: 16),
+              // Sélecteur d'équipe si le joueur n'en a pas encore
+              if (!_isPlayerInTeam(session, authProvider.currentPlayer?.id))
+                DoodleCard(
+                  color: DoodleTheme.cloudWhite,
                   child: Column(
                     children: [
+                      const Icon(
+                        Icons.groups,
+                        size: 48,
+                        color: DoodleTheme.pencilGray,
+                      ),
+                      const SizedBox(height: 12),
                       const Text(
                         'Choisissez votre équipe',
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
+                          color: DoodleTheme.inkBlack,
                         ),
                       ),
                       const SizedBox(height: 16),
                       Row(
                         children: [
                           Expanded(
-                            child: ElevatedButton.icon(
+                            child: DoodleButton(
+                              text: 'Équipe\nRouge',
                               onPressed: gameProvider.isLoading
-                                  ? null
+                                  ? () {}
                                   : () => _joinTeam('red'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.red,
-                                foregroundColor: Colors.white,
-                                minimumSize: const Size(0, 50),
-                              ),
-                              icon: const Icon(Icons.group),
-                              label: const Text('Équipe Rouge'),
+                              color: DoodleTheme.teamRed,
+                              icon: Icons.group,
                             ),
                           ),
                           const SizedBox(width: 16),
                           Expanded(
-                            child: ElevatedButton.icon(
+                            child: DoodleButton(
+                              text: 'Équipe\nBleue',
                               onPressed: gameProvider.isLoading
-                                  ? null
+                                  ? () {}
                                   : () => _joinTeam('blue'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue,
-                                foregroundColor: Colors.white,
-                                minimumSize: const Size(0, 50),
-                              ),
-                              icon: const Icon(Icons.group),
-                              label: const Text('Équipe Bleue'),
+                              color: DoodleTheme.teamBlue,
+                              icon: Icons.group,
                             ),
                           ),
                         ],
@@ -217,48 +298,104 @@ class _LobbyScreenState extends State<LobbyScreen> {
                     ],
                   ),
                 ),
+              const SizedBox(height: 16),
+              // Affichage des équipes
+              const Text(
+                '👥 Équipes',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: DoodleTheme.inkBlack,
+                ),
+                textAlign: TextAlign.center,
               ),
-            const SizedBox(height: 16),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Card(
-                    color: Colors.red.shade50,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
+              const SizedBox(height: 12),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: DoodleCard(
+                      color: const Color(0xFFFFCDD2),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            '🔴 Équipe Rouge',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          const Row(
+                            children: [
+                              Icon(Icons.group, color: DoodleTheme.teamRed, size: 24),
+                              SizedBox(width: 6),
+                              Flexible(
+                                child: Text(
+                                  'Équipe Rouge',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: DoodleTheme.teamRed,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 8),
-                          if (session.redTeam == null ||
-                              session.redTeam!.isEmpty)
-                            const Text('Aucun joueur')
+                          const SizedBox(height: 12),
+                          if (session.redTeam == null || session.redTeam!.isEmpty)
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF5F5F5),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: DoodleTheme.pencilGray,
+                                  width: 1,
+                                ),
+                              ),
+                              child: const Text(
+                                'En attente de joueurs...',
+                                style: TextStyle(
+                                  color: DoodleTheme.pencilGray,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                            )
                           else
                             ...session.redTeam!.map(
-                              (player) => Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 4,
+                              (player) => Container(
+                                margin: const EdgeInsets.only(bottom: 8),
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: player.id == authProvider.currentPlayer?.id
+                                      ? const Color(0xFFFFF9C4)
+                                      : Colors.white,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: player.id == authProvider.currentPlayer?.id
+                                        ? DoodleTheme.sunYellow
+                                        : DoodleTheme.inkBlack,
+                                    width: player.id == authProvider.currentPlayer?.id ? 2 : 1,
+                                  ),
                                 ),
                                 child: Row(
                                   children: [
-                                    const Icon(Icons.person, size: 16),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      player.name,
-                                      style: TextStyle(
-                                        fontWeight:
-                                            player.id ==
-                                                authProvider.currentPlayer?.id
-                                            ? FontWeight.bold
-                                            : FontWeight.normal,
+                                    Icon(
+                                      player.id == authProvider.currentPlayer?.id
+                                          ? Icons.star
+                                          : Icons.person,
+                                      size: 20,
+                                      color: player.id == authProvider.currentPlayer?.id
+                                          ? DoodleTheme.sunYellow
+                                          : DoodleTheme.teamRed,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        player.name,
+                                        style: TextStyle(
+                                          fontWeight: player.id == authProvider.currentPlayer?.id
+                                              ? FontWeight.bold
+                                              : FontWeight.normal,
+                                          fontSize: 14,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 1,
                                       ),
                                     ),
                                   ],
@@ -269,45 +406,90 @@ class _LobbyScreenState extends State<LobbyScreen> {
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Card(
-                    color: Colors.blue.shade50,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: DoodleCard(
+                      color: const Color(0xFFBBDEFB),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            '🔵 Équipe Bleue',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          const Row(
+                            children: [
+                              Icon(Icons.group, color: DoodleTheme.teamBlue, size: 24),
+                              SizedBox(width: 6),
+                              Flexible(
+                                child: Text(
+                                  'Équipe Bleue',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: DoodleTheme.teamBlue,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 8),
-                          if (session.blueTeam == null ||
-                              session.blueTeam!.isEmpty)
-                            const Text('Aucun joueur')
+                          const SizedBox(height: 12),
+                          if (session.blueTeam == null || session.blueTeam!.isEmpty)
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF5F5F5),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: DoodleTheme.pencilGray,
+                                  width: 1,
+                                ),
+                              ),
+                              child: const Text(
+                                'En attente de joueurs...',
+                                style: TextStyle(
+                                  color: DoodleTheme.pencilGray,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                            )
                           else
                             ...session.blueTeam!.map(
-                              (player) => Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 4,
+                              (player) => Container(
+                                margin: const EdgeInsets.only(bottom: 8),
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: player.id == authProvider.currentPlayer?.id
+                                      ? const Color(0xFFFFF9C4)
+                                      : Colors.white,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: player.id == authProvider.currentPlayer?.id
+                                        ? DoodleTheme.sunYellow
+                                        : DoodleTheme.inkBlack,
+                                    width: player.id == authProvider.currentPlayer?.id ? 2 : 1,
+                                  ),
                                 ),
                                 child: Row(
                                   children: [
-                                    const Icon(Icons.person, size: 16),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      player.name,
-                                      style: TextStyle(
-                                        fontWeight:
-                                            player.id ==
-                                                authProvider.currentPlayer?.id
-                                            ? FontWeight.bold
-                                            : FontWeight.normal,
+                                    Icon(
+                                      player.id == authProvider.currentPlayer?.id
+                                          ? Icons.star
+                                          : Icons.person,
+                                      size: 20,
+                                      color: player.id == authProvider.currentPlayer?.id
+                                          ? DoodleTheme.sunYellow
+                                          : DoodleTheme.teamBlue,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        player.name,
+                                        style: TextStyle(
+                                          fontWeight: player.id == authProvider.currentPlayer?.id
+                                              ? FontWeight.bold
+                                              : FontWeight.normal,
+                                          fontSize: 14,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 1,
                                       ),
                                     ),
                                   ],
@@ -318,78 +500,91 @@ class _LobbyScreenState extends State<LobbyScreen> {
                       ),
                     ),
                   ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              // Actions selon le statut
+              if (gameProvider.currentSessionStatus == 'lobby') ...[
+                DoodleButton(
+                  text: '🚀 Démarrer la partie',
+                  onPressed: gameProvider.isLoading
+                      ? () {}
+                      : () async {
+                          final success = await gameProvider.startSession();
+                          if (success && context.mounted) {
+                            Navigator.of(context).pushReplacementNamed('/challenge');
+                          }
+                        },
+                  color: DoodleTheme.grassGreen,
+                  icon: Icons.play_arrow,
+                ),
+              ] else if (gameProvider.currentSessionStatus == 'challenge') ...[
+                DoodleButton(
+                  text: '📝 Envoyer des challenges',
+                  onPressed: () {
+                    Navigator.of(context).pushReplacementNamed('/challenge');
+                  },
+                  color: DoodleTheme.sunYellow,
+                  icon: Icons.edit,
+                ),
+              ] else if (gameProvider.currentSessionStatus == 'drawing') ...[
+                DoodleButton(
+                  text: '🎨 Dessiner',
+                  onPressed: () {
+                    Navigator.of(context).pushReplacementNamed('/drawing');
+                  },
+                  color: DoodleTheme.teamRed,
+                  icon: Icons.brush,
+                ),
+              ] else if (gameProvider.currentSessionStatus == 'guessing') ...[
+                DoodleButton(
+                  text: '🔍 Deviner',
+                  onPressed: () {
+                    Navigator.of(context).pushReplacementNamed('/guessing');
+                  },
+                  color: DoodleTheme.teamBlue,
+                  icon: Icons.search,
+                ),
+              ] else if (gameProvider.currentSessionStatus == 'finished') ...[
+                DoodleButton(
+                  text: '🏆 Voir les résultats',
+                  onPressed: () {
+                    Navigator.of(context).pushReplacementNamed('/results');
+                  },
+                  color: DoodleTheme.sunYellow,
+                  icon: Icons.emoji_events,
                 ),
               ],
-            ),
-            const SizedBox(height: 24),
-            if (gameProvider.currentSessionStatus == 'lobby') ...[
-              ElevatedButton(
-                onPressed: gameProvider.isLoading
-                    ? null
-                    : () async {
-                        final success = await gameProvider.startSession();
-                        if (success && context.mounted) {
-                          Navigator.of(
-                            context,
-                          ).pushReplacementNamed('/challenge');
-                        }
-                      },
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 50),
+              if (gameProvider.error != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: DoodleCard(
+                    color: const Color(0xFFFFCDD2),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.error_outline,
+                          color: DoodleTheme.teamRed,
+                          size: 32,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            gameProvider.error!,
+                            style: const TextStyle(
+                              color: DoodleTheme.teamRed,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-                child: const Text('Démarrer la partie'),
-              ),
-            ] else if (gameProvider.currentSessionStatus == 'challenge') ...[
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pushReplacementNamed('/challenge');
-                },
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 50),
-                ),
-                child: const Text('Envoyer des challenges'),
-              ),
-            ] else if (gameProvider.currentSessionStatus == 'drawing') ...[
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pushReplacementNamed('/drawing');
-                },
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 50),
-                ),
-                child: const Text('Dessiner'),
-              ),
-            ] else if (gameProvider.currentSessionStatus == 'guessing') ...[
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pushReplacementNamed('/guessing');
-                },
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 50),
-                ),
-                child: const Text('Deviner'),
-              ),
-            ] else if (gameProvider.currentSessionStatus == 'finished') ...[
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pushReplacementNamed('/results');
-                },
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 50),
-                ),
-                child: const Text('Voir les résultats'),
-              ),
+              const SizedBox(height: 20),
             ],
-            if (gameProvider.error != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 16),
-                child: Text(
-                  gameProvider.error!,
-                  style: const TextStyle(color: Colors.red),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-          ],
+          ),
         ),
       ),
     );

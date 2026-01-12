@@ -13,6 +13,7 @@ import 'screens/challenge_screen.dart';
 import 'screens/drawing_screen.dart';
 import 'screens/guessing_screen.dart';
 import 'screens/finished_screen.dart';
+import 'theme/doodle_theme.dart';
 import 'utils/logger.dart';
 
 Future<void> main() async {
@@ -54,10 +55,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Pictonary',
         debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-          useMaterial3: true,
-        ),
+        theme: DoodleTheme.theme,
         home: const AuthWrapper(),
         routes: {
           '/login': (context) => const LoginScreen(),

@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../providers/challenge_provider.dart';
 import '../providers/game_provider.dart';
 import '../providers/auth_provider.dart';
+import '../widgets/notebook_background.dart';
+import '../theme/doodle_theme.dart';
 
 class ChallengeScreen extends StatefulWidget {
   const ChallengeScreen({super.key});
@@ -282,17 +284,14 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
     final authProvider = context.watch<AuthProvider>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Phase Challenge - 3 phrases à créer')),
-      body: _submitted
-          ? Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Colors.green[50]!, Colors.white],
-                ),
-              ),
-              child: Center(
+      backgroundColor: DoodleTheme.skyBlue,
+      appBar: AppBar(
+        title: const Text('📝 Phase Challenge'),
+        centerTitle: true,
+      ),
+      body: NotebookBackground(
+        child: _submitted
+            ? Center(
                 child: Padding(
                   padding: const EdgeInsets.all(32.0),
                   child: Column(
@@ -349,18 +348,17 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
                       const SizedBox(height: 24),
                       Text(
                         'Vérification toutes les 3 secondes...',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 12,
                           fontStyle: FontStyle.italic,
-                          color: Colors.grey[500],
+                          color: DoodleTheme.pencilGray,
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
-            )
-          : SingleChildScrollView(
+              )
+            : SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
               child: Form(
                 key: _formKey,
@@ -485,6 +483,7 @@ class _ChallengeScreenState extends State<ChallengeScreen> {
                 ),
               ),
             ),
+      ),
     );
   }
 

@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../providers/challenge_provider.dart';
 import '../providers/game_provider.dart';
 import '../providers/auth_provider.dart';
+import '../widgets/notebook_background.dart';
+import '../theme/doodle_theme.dart';
 
 class DrawingScreen extends StatefulWidget {
   const DrawingScreen({super.key});
@@ -132,21 +134,22 @@ class _DrawingScreenState extends State<DrawingScreen> {
     );
 
     return Scaffold(
+      backgroundColor: DoodleTheme.skyBlue,
       appBar: AppBar(
-        title: const Text('Phase Dessin'),
-        backgroundColor: Colors.orange,
-        foregroundColor: Colors.white,
+        title: const Text('🎨 Phase Dessin'),
+        centerTitle: true,
       ),
-      body: challengeProvider.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : challenges.isEmpty
-          ? const Center(
-              child: Text(
-                'Aucun challenge à dessiner',
-                style: TextStyle(fontSize: 18, color: Colors.grey),
-              ),
-            )
-          : SingleChildScrollView(
+      body: NotebookBackground(
+        child: challengeProvider.isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : challenges.isEmpty
+            ? const Center(
+                child: Text(
+                  'Aucun challenge à dessiner',
+                  style: TextStyle(fontSize: 18, color: DoodleTheme.pencilGray),
+                ),
+              )
+            : SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -260,6 +263,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
                 ],
               ),
             ),
+      ),
     );
   }
 

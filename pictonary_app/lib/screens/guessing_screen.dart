@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../providers/challenge_provider.dart';
 import '../providers/game_provider.dart';
 import '../providers/auth_provider.dart';
+import '../widgets/notebook_background.dart';
+import '../theme/doodle_theme.dart';
 
 class GuessingScreen extends StatefulWidget {
   const GuessingScreen({super.key});
@@ -163,21 +165,22 @@ class _GuessingScreenState extends State<GuessingScreen> {
     );
 
     return Scaffold(
+      backgroundColor: DoodleTheme.skyBlue,
       appBar: AppBar(
-        title: const Text('Phase Deviner'),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
+        title: const Text('🔍 Phase Deviner'),
+        centerTitle: true,
       ),
-      body: challengeProvider.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : challenges.isEmpty
-              ? const Center(
-                  child: Text(
-                    'Aucun challenge à deviner',
-                    style: TextStyle(fontSize: 18, color: Colors.grey),
-                  ),
-                )
-              : SingleChildScrollView(
+      body: NotebookBackground(
+        child: challengeProvider.isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : challenges.isEmpty
+                ? const Center(
+                    child: Text(
+                      'Aucun challenge à deviner',
+                      style: TextStyle(fontSize: 18, color: DoodleTheme.pencilGray),
+                    ),
+                  )
+                : SingleChildScrollView(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -297,6 +300,7 @@ class _GuessingScreenState extends State<GuessingScreen> {
                     ],
                   ),
                 ),
+      ),
     );
   }
 
